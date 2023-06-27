@@ -1,61 +1,65 @@
-const Temp = require("../../models/Temp");
-const passHash = require("../../utils/auth/passhash");
-const generateToken = require("../../utils/auth/generateToken");
+const Genre = require("../../models/Genre");
+const Movie = require("../../models/Movie");
 
-// Everything with the word temp is a placeholder that you'll change in accordance with your project
+// Everything with the word genre is a placeholder that you'll change in accordance with your project
 
-exports.fetchTemp = async (tempId, next) => {
+exports.fetchGenre = async (genreId, next) => {
   try {
-    const temp1 = await Temp.findById(tempId);
-    return temp1;
+    const genre1 = await Genre.findById(genreId);
+    return genre1;
   } catch (error) {
     return next(error);
   }
 };
 
-exports.getTemp = async (req, res, next) => {
+exports.getGenre = async (req, res, next) => {
   try {
-    const temps = await Temp.find().select("-__v");
-    return res.status(200).json(temps);
+    const genres = await Genre.find().select("-__v").populate("movies", "name");
+    return res.status(200).json(genres);
   } catch (error) {
     return next(error);
   }
 };
 
-exports.createTemp = async (req, res, next) => {
+exports.createGenre = async (req, res, next) => {
   try {
-    const { password } = req.body;
-    req.body.password = await passHash(password);
-    const newTemp = await Temp.create(req.body);
-    const token = generateToken(newTemp);
-    res.status(201).json({ token });
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
+    const newGenre = await Genre.create(req.body);
+    res.status(201).json(newGenre);
   } catch (err) {
     return res.status(500).json(err.message);
   }
 };
 
-exports.signin = async (req, res) => {
+exports.updateGenre = async (req, res, next) => {
   try {
-    const token = generateToken(req.user);
-    return res.status(200).json({ token });
-  } catch (err) {
-    return res.status(500).json(err.message);
-  }
-};
-
-exports.updateTemp = async (req, res, next) => {
-  try {
-    await Temp.findByIdAndUpdate(req.temp.id, req.body);
+    await req.genre.updateOne(req.body);
     return res.status(204).end();
   } catch (error) {
     return next(error);
   }
 };
 
-exports.deleteTemp = async (req, res, next) => {
+exports.deleteGenre = async (req, res, next) => {
   try {
-    await Temp.findByIdAndRemove({ _id: req.temp.id });
+    await req.genre.deleteOne();
     return res.status(204).end();
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.addGenreToMovie = async (req, res, next) => {
+  try {
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
+    const { movieId } = req.params;
+    const foundMovie = await Movie.findById({ _id: movieId });
+    if (!foundMovie) return next({ status: 404, message: "Movie not found" });
+    await foundMovie.updateOne({ $push: { genres: req.genre._id } });
+    await req.genre.updateOne({ $push: { movies: foundMovie._id } });
+    return res.status(200).end();
   } catch (error) {
     return next(error);
   }

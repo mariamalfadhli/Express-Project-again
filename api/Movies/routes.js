@@ -1,36 +1,28 @@
 const express = require("express");
 const {
-  getTemp,
-  createTemp,
-  updateTemp,
-  deleteTemp,
-  fetchTemp,
-  signin,
+  getMovie,
+  createMovie,
+  getByMovieId,
+  fetchMovie,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
 
-// Everything with the word temp is a placeholder that you'll change in accordance with your project
+// Everything with the word movie is a placeholder that you'll change in accordance with your project
 
-router.param("tempId", async (req, res, next, tempId) => {
+router.param("movieId", async (req, res, next, movieId) => {
   try {
-    const foundTemp = await fetchTemp(tempId);
-    if (!foundTemp) return next({ status: 404, message: "Temp not found" });
-    req.temp = foundTemp;
+    const foundMovie = await fetchMovie(movieId);
+    if (!foundMovie) return next({ status: 404, message: "Movie not found" });
+    req.movie = foundMovie;
     next();
   } catch (error) {
     return next(error);
   }
 });
 
-router.get("/", passport.authenticate("jwt", { session: false }), getTemp);
-router.post("/createTemp", createTemp);
-router.post(
-  "/signin",
-  passport.authenticate("local", { session: false }),
-  signin
-);
-router.put("/:tempId", updateTemp);
-router.delete("/:tempId", deleteTemp);
+router.get("/", getMovie);
+router.get("/:movieId", getByMovieId);
+router.post("/", passport.authenticate("jwt", { session: false }), createMovie);
 
 module.exports = router;

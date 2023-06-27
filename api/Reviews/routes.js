@@ -1,36 +1,35 @@
 const express = require("express");
 const {
-  getTemp,
-  createTemp,
-  updateTemp,
-  deleteTemp,
-  fetchTemp,
-  signin,
-} = require("./temp.controllers");
+  getReview,
+  createReview,
+  updateReview,
+  deleteReview,
+  fetchReview,
+  addReview,
+} = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
 
-// Everything with the word temp is a placeholder that you'll change in accordance with your project
+// Everything with the word review is a placeholder that you'll change in accordance with your project
 
-router.param("tempId", async (req, res, next, tempId) => {
+router.param("reviewId", async (req, res, next, reviewId) => {
   try {
-    const foundTemp = await fetchTemp(tempId);
-    if (!foundTemp) return next({ status: 404, message: "Temp not found" });
-    req.temp = foundTemp;
+    const foundReview = await fetchReview(reviewId);
+    if (!foundReview) return next({ status: 404, message: "Review not found" });
+    req.review = foundReview;
     next();
   } catch (error) {
     return next(error);
   }
 });
 
-router.get("/", passport.authenticate("jwt", { session: false }), getTemp);
-router.post("/createTemp", createTemp);
+router.get("/", passport.authenticate("jwt", { session: false }), getReview);
 router.post(
-  "/signin",
-  passport.authenticate("local", { session: false }),
-  signin
+  "/:movieId",
+  passport.authenticate("jwt", { session: false }),
+  addReview
 );
-router.put("/:tempId", updateTemp);
-router.delete("/:tempId", deleteTemp);
+router.put("/:reviewId", updateReview);
+router.delete("/:reviewId", deleteReview);
 
 module.exports = router;

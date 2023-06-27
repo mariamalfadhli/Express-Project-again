@@ -1,60 +1,61 @@
-const Temp = require("../../models/Temp");
-const passHash = require("../../utils/auth/passhash");
-const generateToken = require("../../utils/auth/generateToken");
+const Movie = require("../../models/Movie");
 
-// Everything with the word temp is a placeholder that you'll change in accordance with your project
+// Everything with the word movie is a placeholder that you'll change in accordance with your project
 
-exports.fetchTemp = async (tempId, next) => {
+exports.fetchMovie = async (movieId, next) => {
   try {
-    const temp1 = await Temp.findById(tempId);
-    return temp1;
+    const movie1 = await Movie.findById(movieId)
+      .select("-__v")
+      .populate("genres actors.actor reviews", "name text");
+    return movie1;
   } catch (error) {
     return next(error);
   }
 };
 
-exports.getTemp = async (req, res, next) => {
+exports.getMovie = async (req, res, next) => {
   try {
-    const temps = await Temp.find().select("-__v");
-    return res.status(200).json(temps);
+    const movies = await Movie.find()
+      .select("-__v -reviews -actors -createdAt -updatedAt")
+      .populate("genres", "name -_id");
+    return res.status(200).json(movies);
   } catch (error) {
     return next(error);
   }
 };
 
-exports.createTemp = async (req, res, next) => {
+exports.getByMovieId = async (req, res, next) => {
   try {
-    const { password } = req.body;
-    req.body.password = await passHash(password);
-    const newTemp = await Temp.create(req.body);
-    const token = generateToken(newTemp);
-    res.status(201).json({ token });
+    return res.status(200).json(req.movie);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.createMovie = async (req, res, next) => {
+  try {
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
+    const newMovie = await Movie.create(req.body);
+
+    res.status(201).json(newMovie);
   } catch (err) {
     return res.status(500).json(err.message);
   }
 };
 
-exports.signin = async (req, res) => {
+exports.updateMovie = async (req, res, next) => {
   try {
-    const token = generateToken(req.user);
-    return res.status(200).json({ token });
-  } catch (err) {
-    return res.status(500).json(err.message);
-  }
-};
-
-exports.updateTemp = async (req, res, next) => {
-  try {
-    await Temp.findByIdAndUpdate(req.temp.id, req.body);
+    await Movie.findByIdAndUpdate(req.movie.id, req.body);
     return res.status(204).end();
   } catch (error) {
     return next(error);
   }
 };
 
-exports.deleteTemp = async (req, res, next) => {
+exports.deleteMovie = async (req, res, next) => {
   try {
-    await Temp.findByIdAndRemove({ _id: req.temp.id });
+    await Movie.findByIdAndRemove({ _id: req.movie.id });
     return res.status(204).end();
   } catch (error) {
     return next(error);

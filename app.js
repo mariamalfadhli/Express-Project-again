@@ -6,6 +6,10 @@ const app = express();
 const notFound = require("./middlewares/notFoundHandler");
 const errorHandler = require("./middlewares/errorHandler");
 const userRoutes = require("./api/Users/routes");
+const moviesRoutes = require("./api/Movies/routes");
+const actorsRoutes = require("./api/Actors/routes");
+const genresRoutes = require("./api/Genres/routes");
+const reviewsRoutes = require("./api/Reviews/routes");
 const config = require("./config/keys");
 const passport = require("passport");
 const { localStrategy, jwtStrategy } = require("./middlewares/passport");
@@ -20,7 +24,11 @@ passport.use("local", localStrategy);
 passport.use(jwtStrategy);
 
 // Everything with the word temp is a placeholder that you'll change in accordance with your project
-app.use("/", userRoutes);
+app.use("/auth", userRoutes);
+app.use("/movies", moviesRoutes);
+app.use("/actors", actorsRoutes);
+app.use("/genres", genresRoutes);
+app.use("/reviews", reviewsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

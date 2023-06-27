@@ -8,6 +8,7 @@ const ReviewSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: "User" },
 
   // create relations in here and in the other model
-});
+},
+{ timestamps: true });
 
 module.exports = model("Review", ReviewSchema);
