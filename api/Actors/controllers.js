@@ -14,6 +14,7 @@ exports.fetchActor = async (actorId, next) => {
 
 exports.getActor = async (req, res, next) => {
   try {
+    
     const actors = await Actor.find().select("-__v").populate("movies", "name");
     return res.status(200).json(actors);
   } catch (error) {
@@ -35,6 +36,8 @@ exports.createActor = async (req, res, next) => {
 
 exports.updateActor = async (req, res, next) => {
   try {
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     await Actor.findByIdAndUpdate(req.actor.id, req.body);
     return res.status(204).end();
   } catch (error) {
@@ -44,6 +47,8 @@ exports.updateActor = async (req, res, next) => {
 
 exports.deleteActor = async (req, res, next) => {
   try {
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     await Actor.findByIdAndRemove({ _id: req.actor.id });
     return res.status(204).end();
   } catch (error) {

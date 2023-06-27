@@ -1,9 +1,11 @@
 const express = require("express");
 const {
-  getMovie,
+  getMovies,
   createMovie,
   getByMovieId,
   fetchMovie,
+  addToWatchlist,
+  getWatchlist,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -21,8 +23,18 @@ router.param("movieId", async (req, res, next, movieId) => {
   }
 });
 
-router.get("/", getMovie);
-router.get("/:movieId", getByMovieId);
+router.get("/", getMovies);
 router.post("/", passport.authenticate("jwt", { session: false }), createMovie);
+router.get(
+  "/watchlist/",
+  passport.authenticate("jwt", { session: false }),
+  getWatchlist
+);
 
+router.get("/:movieId", getByMovieId);
+router.put(
+  "/watchlist/:movieId",
+  passport.authenticate("jwt", { session: false }),
+  addToWatchlist
+);
 module.exports = router;

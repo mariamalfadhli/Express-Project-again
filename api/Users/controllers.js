@@ -44,7 +44,6 @@ exports.createUser = async (req, res, next) => {
 
 exports.signin = async (req, res, next) => {
   try {
-    console.log(req.user);
     const token = generateToken(req.user);
     return res.status(200).json({ token });
   } catch (error) {
@@ -54,7 +53,9 @@ exports.signin = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   try {
-    await User.findByIdAndUpdate(req.foundUser.id, req.body);
+    if (!req.user.isStaff && !req.user._id.equals(req.foundUser._id))
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
+    await User.findByIdAndUpdate(req.foundUser._id, req.body);
     return res.status(204).end();
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -63,7 +64,9 @@ exports.updateUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
   try {
-    await User.findByIdAndRemove({ _id: req.foundUser.id });
+    if (!req.user.isStaff && !req.user._id.equals(req.foundUser._id))
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
+    await User.findByIdAndRemove({ _id: req.foundUser._id });
     return res.status(204).end();
   } catch (error) {
     return next({ status: 400, message: error.message });

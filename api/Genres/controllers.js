@@ -34,6 +34,8 @@ exports.createGenre = async (req, res, next) => {
 
 exports.updateGenre = async (req, res, next) => {
   try {
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     await req.genre.updateOne(req.body);
     return res.status(204).end();
   } catch (error) {
@@ -43,6 +45,8 @@ exports.updateGenre = async (req, res, next) => {
 
 exports.deleteGenre = async (req, res, next) => {
   try {
+    if (!req.user.isStaff)
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     await req.genre.deleteOne();
     return res.status(204).end();
   } catch (error) {

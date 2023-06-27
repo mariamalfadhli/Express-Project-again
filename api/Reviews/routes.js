@@ -1,15 +1,16 @@
 const express = require("express");
 const {
   getReview,
-  createReview,
   updateReview,
   deleteReview,
   fetchReview,
   addReview,
+  getMyReviews,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
-
+const validateRating = require("../../middlewares/validateRating");
+const signedIn = passport.authenticate("jwt", { session: false });
 // Everything with the word review is a placeholder that you'll change in accordance with your project
 
 router.param("reviewId", async (req, res, next, reviewId) => {
@@ -22,14 +23,11 @@ router.param("reviewId", async (req, res, next, reviewId) => {
     return next(error);
   }
 });
-
-router.get("/", passport.authenticate("jwt", { session: false }), getReview);
-router.post(
-  "/:movieId",
-  passport.authenticate("jwt", { session: false }),
-  addReview
-);
-router.put("/:reviewId", updateReview);
-router.delete("/:reviewId", deleteReview);
+router.use(validateRating);
+router.get("/", signedIn, getReview);
+router.get("/my-reviews", signedIn, getMyReviews);
+router.post("/:movieId", signedIn, addReview);
+router.put("/edit/:reviewId", signedIn, updateReview);
+router.delete("/delete/:reviewId", signedIn, deleteReview);
 
 module.exports = router;
