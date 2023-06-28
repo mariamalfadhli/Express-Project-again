@@ -15,10 +15,24 @@ exports.getReview = async (req, res, next) => {
   try {
     if (!req.user.isStaff)
       return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
+
+    const { page = 1, limit = 10 } = req.query;
+    // execute query with page and limit values
     const reviews = await Review.find()
       .select("-__v")
-      .populate("movieId userId", "name username");
-    return res.status(200).json(reviews);
+      .populate("movieId userId", "name username")
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+    // get total documents in the Posts collection
+    const count = await Review.countDocuments();
+
+    // return response with posts, total pages, and current page
+    return res.status(200).json({
+      reviews,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+    });
   } catch (error) {
     return next(error);
   }
@@ -26,12 +40,25 @@ exports.getReview = async (req, res, next) => {
 
 exports.getMyReviews = async (req, res, next) => {
   try {
+    const { page = 1, limit = 10 } = req.query;
+    // execute query with page and limit values
     const reviews = await Review.find({ userId: { _id: req.user._id } })
-      .select("-__v")
-      .populate("movieId userId", "name username");
+      .select("-__v -userId")
+      .populate("movieId", "name")
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .exec();
+    // get total documents in the Posts collection
+    const count = await Review.countDocuments();
+
     if (reviews.length <= 0)
       return res.status(200).json({ message: "you have zero reviews!" });
-    return res.status(200).json(reviews);
+    // return response with posts, total pages, and current page
+    return res.status(200).json({
+      reviews,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+    });
   } catch (error) {
     return next(error);
   }

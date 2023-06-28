@@ -11,9 +11,9 @@ const passport = require("passport");
 
 const upload = require("../../middlewares/uploader");
 const {
-  validatePassword,
-  passwordValidationRules,
-} = require("../../middlewares/passwordValidation");
+  validationRules,
+  validateFields,
+} = require("../../middlewares/validateFields");
 
 // Everything with the word user is a placeholder that you'll change in accordance with your project
 
@@ -31,8 +31,8 @@ router.param("userId", async (req, res, next, userId) => {
 router.get("/", passport.authenticate("jwt", { session: false }), getUser);
 router.post(
   "/register",
-  passwordValidationRules(),
-  validatePassword,
+  validationRules(),
+  validateFields,
   upload.single("image"),
   createUser
 );

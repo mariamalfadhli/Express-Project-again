@@ -1,6 +1,6 @@
 const { body, validationResult } = require("express-validator");
 
-const passwordValidationRules = () => {
+const validationRules = () => {
   return [
     // Must be at least 8 characters long
     body("password")
@@ -18,15 +18,16 @@ const passwordValidationRules = () => {
     body("password")
       .matches(/[a-z]/)
       .withMessage("Password must contain a lowercase letter."),
+    body("email").isEmail().withMessage("Email must be valid."),
   ];
 };
 
-const validatePassword = (req, res, next) => {
+const validateFields = (req, res, next) => {
   const errors = validationResult(req);
   if (errors.isEmpty()) {
     return next();
   }
-  console.log(errors);
+
   const extractedErrors = [];
   errors.array().map((err) => extractedErrors.push({ [err.path]: err.msg }));
 
@@ -36,6 +37,6 @@ const validatePassword = (req, res, next) => {
 };
 
 module.exports = {
-  passwordValidationRules,
-  validatePassword,
+  validationRules,
+  validateFields,
 };

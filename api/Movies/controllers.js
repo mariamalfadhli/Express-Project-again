@@ -77,8 +77,6 @@ exports.deleteMovie = async (req, res, next) => {
 
 exports.addToWatchlist = async (req, res, next) => {
   try {
-    if (!req.user.isStaff && !req.user._id.equals(req.foundUser._id))
-      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     const foundWatchlist = await Watchlist.findOne({
       userId: { _id: req.user._id },
     });
@@ -86,6 +84,8 @@ exports.addToWatchlist = async (req, res, next) => {
       await Watchlist.create({ userId: req.user._id, movies: req.movie._id });
     } else if (foundWatchlist) {
       let added = false;
+      if (!req.user.isStaff && !req.user._id.equals(foundWatchlist.userId._id))
+        return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
       if (foundWatchlist.movies.length > 0) {
         foundWatchlist.movies.forEach((movie) =>
           movie._id.equals(req.movie._id) ? (added = true) : (added = false)
@@ -116,28 +116,15 @@ exports.addToWatchlist = async (req, res, next) => {
   }
 };
 
-exports.deleteFromWatchlist = async (req, res, next) => {
-  try {
-    if (!req.user.isStaff)
-      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
-    const newMovie = await Movie.create(req.body);
-
-    res.status(201).json(newMovie);
-  } catch (err) {
-    return res.status(500).json(err.message);
-  }
-};
-
 exports.getWatchlist = async (req, res, next) => {
   try {
-    if (!req.user.isStaff && !req.user._id.equals(req.foundUser._id))
-      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     const foundWatchlist = await Watchlist.findOne({
       userId: { _id: req.user._id },
     }).populate("movies", "name");
     if (!foundWatchlist)
       return next({ status: 401, message: "your watchlist is empty" });
-
+    if (!req.user.isStaff && !req.user._id.equals(foundWatchlist.userId._id))
+      return next({ status: 401, message: "La tsthbl ent mo admin!!!" });
     res.status(200).json(foundWatchlist);
   } catch (err) {
     return res.status(500).json(err.message);
