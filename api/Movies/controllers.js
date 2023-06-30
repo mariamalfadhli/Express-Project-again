@@ -99,7 +99,7 @@ exports.addToWatchlist = async (req, res, next) => {
 
         return next({
           status: 200,
-          message: `movie was succesfully removed from your watchlist`,
+          message: `${req.movie.name} was succesfully removed from your watchlist`,
         });
       }
 
@@ -110,7 +110,9 @@ exports.addToWatchlist = async (req, res, next) => {
 
     res
       .status(201)
-      .json({ message: `movie was succesfully added to your watchlist` });
+      .json({
+        message: `${req.movie.name} was succesfully added to your watchlist`,
+      });
   } catch (err) {
     return res.status(500).json(err.message);
   }

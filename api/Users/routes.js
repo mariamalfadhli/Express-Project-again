@@ -31,9 +31,9 @@ router.param("userId", async (req, res, next, userId) => {
 router.get("/users", passport.authenticate("jwt", { session: false }), getUser);
 router.post(
   "/register",
+  upload.single("image"),
   validationRules(),
   validateFields,
-  upload.single("image"),
   createUser
 );
 router.post(

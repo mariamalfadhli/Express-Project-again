@@ -26,6 +26,7 @@ exports.getUser = async (req, res, next) => {
 
 exports.createUser = async (req, res, next) => {
   try {
+    
     if (req.file) {
       req.body.image = `${req.file.path.replace("\\", "/")}`;
     }
